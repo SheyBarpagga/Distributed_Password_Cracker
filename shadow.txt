@@ -1,0 +1,16 @@
+md5_1:$1$ThisIsAT$A8lpkEyjumTaHprxR1hUn/:18792:0:99999:7:::
+md5_2:$1$ThisIsAT$QBZBIWk3jgFzM8AbSokui0:18792:0:99999:7:::
+md5_3:$1$ThisIsAT$tBisCVuJBsHOcKrJd1oAP.:18792:0:99999:7:::
+md5_4:$1$ThisIsAT$YvkfpyMQGPbjkOchoMGEs1:18792:0:99999:7:::
+
+sha256_1:$5$ThisIsATestSalt$zeE6sxV3iwzEgAVkOMmPpNyFSEX13EivjiaAugkrjmD:18792:0:99999:7:::
+sha256_2:$5$ThisIsATestSalt$pKYskYpdhpl/HgvjeTUUd9M4/Aw5jlukUlT8sXhF95D:18792:0:99999:7:::
+sha256_3:$5$ThisIsATestSalt$ZzOzcDWWAGGWSAs1v9H/i8Chw3Cuf5fyHi9UwdIWQq5:18792:0:99999:7:::
+sha256_4:$5$ThisIsATestSalt$yfoUaDTPIu5LyJDDj6mHFGefoL9mK1o1DVr/1eN9/E8:18792:0:99999:7:::
+
+sha512_1:$6$ThisIsATestSalt$iKD.vcAAhIIxBugsFi6vSDRb3SI1f.p1FtQIBDibYZpCKzv.WddLOaqtpASsqxA/E9vcXtncd1J33MzuMNwqf.:18792:0:99999:7:::
+sha512_2:$6$ThisIsATestSalt$ARwYAb33tt4DkubSqwIkFZUfCye1OeuaGYpytoszaUH4KKGYSsDgTCd7zbzzcHJv2QYDMNUUhBc2TEKgDpoYb/:18792:0:99999:7:::
+sha512_3:$6$ThisIsATestSalt$eAJODStzj99lC08Y0J2ZqApmZ2JhLopj.DzN8NOBTtOH19Ka11RDrfzhOU86lbXJwMdbrtECV6pVI.h/4mNmI/:18792:0:99999:7:::
+sha512_4:$6$ThisIsATestSalt$NrrUVWp9G9qfpdzQw55qtcmGRPloWzhtcmYR0CgxEX0rgavKkcwCUNWJYg.dsPFPW6AZo/T1pSowXjvKkXyNv0:18792:0:99999:7:::
+
+dict:$1$ThisIsAT$ghUSA8LlMP1tFTUaFBOrp.:18792:0:99999:7:::

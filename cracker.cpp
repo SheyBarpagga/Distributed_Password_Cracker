@@ -99,17 +99,39 @@ void start_brute_force(const std::string& salt, const std::string& password_hash
     }
 }
 
+void dictionary_attack(const std::string& salt, const std::string& password_hash, const std::string& dict_file) {
+    std::ifstream file(dict_file);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open dictionary file" << std::endl;
+        return;
+    }
+
+    std::string password;
+    while (std::getline(file, password)) {
+        std::string current_attempt = hash(password, salt);
+        if (current_attempt == password_hash) {
+            std::cout << "Password found via dictionary attack: " << password << std::endl;
+            std::cout << "Hash : " << current_attempt << std::endl;
+            FOUND = true;
+            return;
+        }
+    }
+}
+
 
 int main() {
     std::string username;
     std::string file_path = "";
+    std::string dict_file;
     int max_length;
 
-    std::cout << "Enter the file path (/etc/shadow is default)" << std::endl;
+    std::cout << "Enter the file path (/etc/shadow is default): ";
     std::cin >> file_path;
-    std::cout << "Enter the username you wish to crack: " << std::endl;
+    std::cout << "Enter the username you wish to crack: ";
     std::cin >> username;
-    std::cout << "Enter the max length of the password: " << std::endl;
+    std::cout << "Enter the path to the dictionary file: ";
+    std::cin >> dict_file;
+    std::cout << "Enter the max length of the password: ";
     std::cin >> max_length;
 
     if (file_path.empty()) {
@@ -121,6 +143,10 @@ int main() {
     std::string salt = get_salt(shadow_line);
     std::string password_hash = get_password_hash(shadow_line);
 
+    dictionary_attack(salt, password_hash, dict_file);
+    if (FOUND) {
+        exit(0);
+    }
     start_brute_force(salt, password_hash, max_length);
 
 
@@ -134,7 +160,7 @@ int main() {
     //     t = clock();
     //
     //     std::string username = "sha512_" + std::to_string(i);
-    //     std::string shadow_line = get_shadow(username, "/home/sheybarpagga/CLionProjects/8005_assignment_3/passwords.txt");
+    //     std::string shadow_line = get_shadow(username, "/home/sheybarpagga/CLionProjects/8005_assignment_3/shadow.txt");
     //     std::string hash_type = get_type(shadow_line);
     //     std::string salt = get_salt(shadow_line);
     //     std::string password_hash = get_password_hash(shadow_line);
@@ -145,7 +171,7 @@ int main() {
     //     FOUND = false;
     // }
     // std::string username = "md5_2";;
-    // std::string shadow_line = get_shadow(username, "/home/sheybarpagga/CLionProjects/8005_assignment_3/passwords.txt");
+    // std::string shadow_line = get_shadow(username, "/home/sheybarpagga/CLionProjects/8005_assignment_3/shadow.txt");
     // std::string hash_type = get_type(shadow_line);
     // std::string salt = get_salt(shadow_line);
     // std::string password_hash = get_password_hash(shadow_line);
