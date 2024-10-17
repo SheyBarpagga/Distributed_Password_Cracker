@@ -123,9 +123,9 @@ int main() {
     std::string username;
     std::string file_path = "";
     std::string dict_file;
-    int max_length;
+    int max_length = 0;
 
-    std::cout << "Enter the file path (/etc/shadow is default): ";
+    std::cout << "Enter the file path: ";
     std::cin >> file_path;
     std::cout << "Enter the username you wish to crack: ";
     std::cin >> username;
@@ -134,9 +134,10 @@ int main() {
     std::cout << "Enter the max length of the password: ";
     std::cin >> max_length;
 
-    if (file_path.empty()) {
-        file_path = "/etc/shadow";
+    if (max_length == 0) {
+        max_length = 5;
     }
+
 
     std::string shadow_line = get_shadow(username, file_path);
     std::string hash_type = get_type(shadow_line);
