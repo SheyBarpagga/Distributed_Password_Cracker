@@ -1,15 +1,15 @@
+#define __XOPEN_SOURCE
+#include <iostream>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <vector>
 #include <unistd.h>
+#include <time.h>
+#include <crypt.h>
 
-// #include <crypt.h>
-#include <wincrypt.h>
-#include <openssl/md5.h>
-#include <openssl/sha.h>
-
+bool FOUND = false;
 // extract hash
 std::string get_shadow(const std::string& username, const std::string& file) {
     std::ifstream shadowFile(file);
@@ -39,7 +39,7 @@ std::string get_salt(const std::string& line) {
     size_t d1 = line.find('$');
     size_t d2 = line.find('$', d1 + 1);
     size_t d3 = line.find('$', d2 + 1);
-    std::string salt = line.substr(d2 + 1, (d3 - d2 - 1));
+    std::string salt = line.substr(d1, (d3 - d1));
     return salt;
 }
 
@@ -50,59 +50,121 @@ std::string get_password_hash(const std::string& line) {
     return password;
 }
 
-std::string to_hex(const char* hash, const size_t length) {
-    std::stringstream ss;
-    for (size_t i = 0; i < length; i++) {
-        ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
+
+
+std::string hash(const std::string& password, const std::string& salt) {
+
+    char* hashed = crypt(password.c_str(), salt.c_str());
+
+    return hashed;
+}
+
+
+
+
+void brute_force(const std::string& salt, const std::string& password_hash, const std::string& current, const int max_length) {
+    if (FOUND) {
+        return;
     }
-    return ss.str();
+
+    const std::string possible_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,.<>?/";
+
+    // Attempt to find passwords of increasing lengths
+    if (current.length() >= max_length) {
+        return; // Stop if we reached max length
+    }
+
+    // Generate next password
+    for (char c : possible_chars) {
+        std::string attempt = current + c;
+        std::string current_attempt = hash(attempt, salt);
+
+        if (current_attempt == password_hash) {
+
+            std::cout << "Password found: " << attempt << std::endl;
+            std::cout << "Hash : " << current_attempt << std::endl;
+            FOUND = true;
+            return;
+        }
+
+        brute_force(salt, password_hash, attempt, max_length);
+    }
 }
 
-std::string md5_hash(const std::string& password, const std::string& salt) {
-    std::string pass = salt + password;
-    unsigned char hash[MD5_DIGEST_LENGTH];
+void start_brute_force(const std::string& salt, const std::string& password_hash, const int max_length) {
 
-    MD5((unsigned char*)pass.c_str(), pass.length(), hash);
-
-    return to_hex(hash, MD5_DIGEST_LENGTH);
-}
-
-std::string blowfish_hash(const std::string& password, const std::string& salt) {
-    struct crypt_data data;
-    data.initialized = 0;
-    char* hashed = crypt_r(password.c_str(), salt.c_str(), &data);
-    return std::basic_string<char>(hashed);
-}
-
-std::string sha256_hash(const std::string& password, const std::string& salt) {
-    std::string input = salt + password;
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256((unsigned char*)input.c_str(), input.length(), hash);
-
-    return toHexString(hash, SHA256_DIGEST_LENGTH);
-}
-
-std::string sha512_hash(const std::string& password, const std::string& salt) {
-    std::string input = salt + password;
-    unsigned char hash[SHA512_DIGEST_LENGTH];
-    SHA256((unsigned char*)input.c_str(), input.length(), hash);
-
-    return toHexString(hash, SHA256_DIGEST_LENGTH);
-}
-
-std::string check_type_and_hash(const std::string& hash_type, const std::string& password, const std::string& salt) {
-    if (hash_type == "1") {
-        return md5_hash(password, salt);
-    } else if (hash_type == "2a" || hash_type == "2y") {
-        return blowfish_hash(password, salt);
-    } else if (hash_type == "5") {
-        return sha256_hash(password, salt);
-    } else if (hash_type == "6") {
-        return sha512_hash(password, salt);
-    } else {
-        std::cerr << "Invalid hash type" << std::endl;
-        exit(1);
+    for (int length = 1; length <= max_length; ++length) {
+        std::string current;
+        brute_force(salt, password_hash, current, length);
     }
 }
 
 
+int main() {
+    std::string username;
+    std::string file_path = "";
+    int max_length;
+
+    std::cout << "Enter the file path (/etc/shadow is default)" << std::endl;
+    std::cin >> file_path;
+    std::cout << "Enter the username you wish to crack: " << std::endl;
+    std::cin >> username;
+    std::cout << "Enter the max length of the password: " << std::endl;
+    std::cin >> max_length;
+
+    if (file_path.empty()) {
+        file_path = "/etc/shadow";
+    }
+
+    std::string shadow_line = get_shadow(username, file_path);
+    std::string hash_type = get_type(shadow_line);
+    std::string salt = get_salt(shadow_line);
+    std::string password_hash = get_password_hash(shadow_line);
+
+    start_brute_force(salt, password_hash, max_length);
+
+
+// /home/sheybarpagga/CLionProjects/8005_assignment_3/passwords.txt
+
+    //for testing:
+
+    // for (int i = 1; i <= 4; i++) {
+    //
+    //     clock_t t;
+    //     t = clock();
+    //
+    //     std::string username = "sha512_" + std::to_string(i);
+    //     std::string shadow_line = get_shadow(username, "/home/sheybarpagga/CLionProjects/8005_assignment_3/passwords.txt");
+    //     std::string hash_type = get_type(shadow_line);
+    //     std::string salt = get_salt(shadow_line);
+    //     std::string password_hash = get_password_hash(shadow_line);
+    //     start_brute_force(salt, password_hash, 15);
+    //     t = clock() - t;
+    //
+    //     std::cout << "In " << ((float)t)/CLOCKS_PER_SEC << " seconds" << std::endl;
+    //     FOUND = false;
+    // }
+    // std::string username = "md5_2";;
+    // std::string shadow_line = get_shadow(username, "/home/sheybarpagga/CLionProjects/8005_assignment_3/passwords.txt");
+    // std::string hash_type = get_type(shadow_line);
+    // std::string salt = get_salt(shadow_line);
+    // std::string password_hash = get_password_hash(shadow_line);
+    // start_brute_force(salt, password_hash, 15);
+
+    // std::cout << hash("a", "$1$ThisIsATestSalt") << std::endl;
+    // std::cout << hash("ae", "$1$ThisIsATestSalt") << std::endl;
+    // std::cout << hash("a$c", "$1$ThisIsATestSalt") << std::endl;
+    // std::cout << hash("ahsb", "$1$ThisIsATestSalt") << std::endl;
+    //
+    // std::cout << hash("a", "$5$ThisIsATestSalt") << std::endl;
+    // std::cout << hash("ae", "$5$ThisIsATestSalt") << std::endl;
+    // std::cout << hash("adc", "$5$ThisIsATestSalt") << std::endl;
+    // std::cout << hash("ahsb", "$5$ThisIsATestSalt") << std::endl;
+    //
+    // std::cout << hash("a", "$6$ThisIsATestSalt") << std::endl;
+    // std::cout << hash("ae", "$6$ThisIsATestSalt") << std::endl;
+    // std::cout << hash("a$c", "$6$ThisIsATestSalt") << std::endl;
+    // std::cout << hash("ahsb", "$6$ThisIsATestSalt") << std::endl;
+
+    return 0;
+}
