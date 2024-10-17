@@ -124,7 +124,7 @@ int main() {
     start_brute_force(salt, password_hash, max_length);
 
 
-// /home/sheybarpagga/CLionProjects/8005_assignment_3/passwords.txt
+//  -lcrypt
 
     //for testing:
 
